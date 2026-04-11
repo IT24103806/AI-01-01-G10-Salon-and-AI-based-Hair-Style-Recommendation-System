@@ -16,29 +16,13 @@
             Salon Oski</h1>
         <nav>
             <a href="/home" class="text-accent">Home</a>
-            <a href="/services">Services</a>
             <a href="/appointment">Appointments</a>
-            <a th:if="${session.user != null and session.user.role == 'BEAUTICIAN'}" href="/beautician-bookings">Client
-                Bookings</a>
-            <a th:if="${session.user != null and session.user.role == 'BEAUTICIAN'}" href="/beautician/dashboard">Beautician Dashboard</a>
-            <a href="/feedback">Feedback</a>
             <a href="/ai-hairstyle">AI Hair Design</a>
-            <a href="/about">About Us</a>
         </nav>
         <div th:if="${session.user}" class="profile-dropdown" style="margin-left: auto;">
             <a class="dropdown-toggle" th:text="${session.user.fullName}"></a>
             <div class="dropdown-menu">
-                <a href="/profile" class="text-accent"><i class="fas fa-user-edit"></i> [[${session.user.role ==
-                    'BEAUTICIAN' ? 'Professional Profile' : 'Edit Profile'}]]</a>
-                <a href="/notifications"><i class="fas fa-bell"></i> Notifications
-                    <span th:if="${notificationCount != null and notificationCount > 0}"
-                        style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 50%; font-size: 0.7rem; margin-left: 5px; vertical-align: middle;"
-                        th:text="${notificationCount}"></span>
-                </a>
                 <a href="/my-appointments"><i class="fas fa-calendar-alt"></i> My Appointments</a>
-                <a th:if="${session.user.role == 'BEAUTICIAN'}" href="/beautician-bookings"><i
-                        class="fas fa-calendar-check"></i> Client Bookings</a>
-                <a href="/readFeedback"><i class="fas fa-comments"></i> My Feedback</a>
                 <div class="divider"></div>
                 <a href="/logout" style="color: #ef4444 !important;"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
@@ -55,8 +39,8 @@
                 </h2>
 
                 <div class="btn-group">
-                    <a href="/services" class="btn-purple">Explore Services</a>
-                    <a href="/ai-hairstyle" class="btn-outline">Try AI Hair Design</a>
+                    <a href="/appointment" class="btn-purple">Book Appointment</a>
+                    <a href="/ai-hairstyle" class="btn-outline">Try AI Hair Advisor</a>
                 </div>
             </div>
         </section>
@@ -112,19 +96,6 @@
                     <p>Using only the finest products for your hair</p>
                 </div>
             </div>
-        </section>
-        <!-- Transform Section -->
-        <section class="section-transform">
-            <div class="content">
-                <h2>Transform Your Look</h2>
-                <p>At SalonX, we believe that everyone deserves to look and feel their best. Our team of expert stylists
-                    combines years of experience with the latest trends and techniques to deliver exceptional results.
-                </p>
-                <p>From classic cuts to bold new styles, color treatments to special occasion styling, we offer a
-                    complete range of services tailored to your unique needs.</p>
-                <a href="/services" class="btn-purple">View All Services</a>
-            </div>
-            <img src="images/transform_look.png" alt="Stylist working on a client">
         </section>
 
 

@@ -12,10 +12,8 @@
     <h1><img src="/images/logo.jpg" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">Salon Oski</h1>
     <nav>
         <a href="/home">Home</a>
-        <a href="/services">Services</a>
         <a href="/appointment">Appointments</a>
         <a href="/ai-hairstyle">AI Hair Design</a>
-        <a href="/about">About Us</a>
     </nav>
     <a href="/login" class="btn-purple" style="margin-left:auto;">Login</a>
 </header>
@@ -25,11 +23,9 @@
         <div class="appointment-card" style="max-width: 500px;">
             <h2>Welcome Back</h2>
             <div th:if="${param.registered}" style="color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Account created successfully. You can log in now.</div>
-            <div th:if="${param.beauticianRegistered}" style="color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Beautician account created. Complete your professional profile after login, then wait for admin approval.</div>
             <div th:if="${param.deleted}" style="color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Your account was deleted successfully.</div>
             <div th:if="${param.logout}" style="color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">You have been signed out.</div>
             <div th:if="${param.error}" style="color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Invalid email or password.</div>
-            <div th:if="${param.oauthError}" style="color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Social sign-in could not be completed. Check the provider credentials and account mapping.</div>
 
             <form action="/login" method="post">
                 <div th:if="${error}" style="color: red; margin-bottom: 1rem; text-align: center;"><span th:text="${error}"></span></div>
@@ -46,41 +42,9 @@
                     <a href="#" style="color: #666; text-decoration: none;">Forgot Password?</a>
                     <br><br>
                     Don't have an account? <a href="/signup" style="color: #000; font-weight: 600;">Sign Up</a>
-                    <br>
-                    Are you a beautician? <a href="/beautician-signup" style="color: #61188a; font-weight: 600;">Join the professional team</a>
                 </div>
             </form>
 
-            <div class="social-auth-section" style="margin-top: 1.5rem;">
-                <div class="social-auth-grid">
-                    <a href="/oauth2/init/google?flow=login" class="social-auth-btn social-auth-google" aria-label="Sign in with Google">
-                        <span class="social-auth-icon google-glyph">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M21.6 12.23c0-.68-.06-1.33-.17-1.95H12v3.69h5.39a4.61 4.61 0 0 1-2 3.03v2.52h3.24c1.9-1.75 2.97-4.33 2.97-7.29Z"/>
-                                <path d="M12 22c2.7 0 4.96-.9 6.61-2.44l-3.24-2.52c-.9.6-2.05.96-3.37.96-2.59 0-4.78-1.75-5.57-4.1H3.08v2.58A9.99 9.99 0 0 0 12 22Z"/>
-                                <path d="M6.43 13.9A5.99 5.99 0 0 1 6.12 12c0-.66.11-1.3.31-1.9V7.52H3.08A9.99 9.99 0 0 0 2 12c0 1.61.39 3.13 1.08 4.48l3.35-2.58Z"/>
-                                <path d="M12 5.98c1.47 0 2.79.5 3.83 1.49l2.87-2.87C16.95 2.98 14.7 2 12 2A9.99 9.99 0 0 0 3.08 7.52l3.35 2.58c.79-2.35 2.98-4.12 5.57-4.12Z"/>
-                            </svg>
-                        </span>
-                        <span class="social-auth-text">Continue with Google</span>
-                    </a>
-                    <a href="/oauth2/init/facebook?flow=login" class="social-auth-btn social-auth-facebook" aria-label="Sign in with Facebook">
-                        <span class="social-auth-icon"><i class="fab fa-facebook-f"></i></span>
-                        <span class="social-auth-text">Continue with Facebook</span>
-                    </a>
-                    <a href="/oauth2/init/apple?flow=login" class="social-auth-btn social-auth-apple" aria-label="Sign in with Apple">
-                        <span class="social-auth-icon"><i class="fab fa-apple"></i></span>
-                        <span class="social-auth-text">Continue with Apple</span>
-                    </a>
-                    <a href="#email" class="social-auth-btn social-auth-email" aria-label="Sign in with Email">
-                        <span class="social-auth-icon"><i class="far fa-envelope"></i></span>
-                        <span class="social-auth-text">Continue with Email</span>
-                    </a>
-                </div>
-                <div th:if="${!oauthEnabled}" style="margin-top: 1rem; color: #666; font-size: 0.9rem; line-height: 1.6;">
-                    Social sign-in buttons are visible now, but provider credentials still need to be added before they can complete successfully.
-                </div>
-            </div>
         </div>
     </section>
 </main>

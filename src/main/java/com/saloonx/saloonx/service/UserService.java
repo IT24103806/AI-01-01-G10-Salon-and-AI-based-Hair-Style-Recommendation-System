@@ -1,9 +1,7 @@
 package com.saloonx.saloonx.service;
 
-import com.saloonx.saloonx.model.Beautician;
 import com.saloonx.saloonx.model.User;
 import com.saloonx.saloonx.repository.AppointmentRepository;
-import com.saloonx.saloonx.repository.BeauticianRepository;
 import com.saloonx.saloonx.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.Objects;
 
 @Service
 public class UserService {
@@ -29,9 +26,6 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private BeauticianRepository beauticianRepository;
 
     @Autowired
     private AppointmentRepository appointmentRepository;
@@ -72,7 +66,7 @@ public class UserService {
         user.setRole(role);
         user.setAuthProvider(user.getAuthProvider() == null || user.getAuthProvider().isBlank() ? "LOCAL" : user.getAuthProvider());
         user.setReferralCode(generateUniqueReferralCode());
-        user.setAccountStatus("BEAUTICIAN".equals(role) ? "PENDING_APPROVAL" : "ACTIVE");
+        user.setAccountStatus("ACTIVE");
         user.setAchievementBadges("");
 
         User savedUser = userRepository.save(user);
@@ -114,14 +108,6 @@ public class UserService {
         }
 
         User savedUser = userRepository.save(user);
-        Optional<Beautician> beauticianOpt = beauticianRepository.findByUserId(savedUser.getId());
-        if (beauticianOpt.isPresent()) {
-            Beautician beautician = beauticianOpt.get();
-            beautician.setFullName(savedUser.getFullName());
-            beautician.setEmail(savedUser.getEmail());
-            beauticianRepository.save(beautician);
-        }
-
         refreshGamification(savedUser);
         return userRepository.save(savedUser);
     }
@@ -154,7 +140,7 @@ public class UserService {
         String normalizedProvider = provider == null ? "OAUTH2" : provider.trim().toUpperCase();
         String normalizedProviderUserId = providerUserId == null ? null : providerUserId.trim();
         String normalizedEmail = resolveOAuthEmail(normalizedProvider, normalizedProviderUserId, email);
-        String normalizedRole = "BEAUTICIAN".equalsIgnoreCase(requestedRole) ? "BEAUTICIAN" : "CUSTOMER";
+        String normalizedRole = "CUSTOMER";
         String resolvedName = (fullName == null || fullName.isBlank()) ? deriveDisplayName(normalizedEmail, normalizedProvider) : fullName.trim();
 
         Optional<User> byProvider = findByProvider(normalizedProvider, normalizedProviderUserId);
@@ -168,9 +154,6 @@ public class UserService {
             Optional<User> byEmail = userRepository.findByEmail(normalizedEmail);
             if (byEmail.isPresent()) {
                 User existingUser = byEmail.get();
-                if ("BEAUTICIAN".equals(normalizedRole) && !"BEAUTICIAN".equals(existingUser.getRole())) {
-                    throw new RuntimeException("This email already belongs to a customer account. Use a different email for beautician onboarding.");
-                }
                 updateOAuthProfile(existingUser, normalizedEmail, resolvedName, normalizedProviderUserId);
                 return userRepository.save(existingUser);
             }
@@ -188,7 +171,7 @@ public class UserService {
         newUser.setAuthProvider(normalizedProvider);
         newUser.setProviderUserId(normalizedProviderUserId);
         newUser.setReferralCode(generateUniqueReferralCode());
-        newUser.setAccountStatus("BEAUTICIAN".equals(normalizedRole) ? "PENDING_APPROVAL" : "ACTIVE");
+        newUser.setAccountStatus("ACTIVE");
         newUser.setAchievementBadges("");
 
         User savedUser = userRepository.save(newUser);
@@ -234,7 +217,6 @@ public class UserService {
     public void refreshGamification(User user) {
         int completedAppointments = Math.max(safeInt(user.getAppointmentsCompleted()),
                 (int) appointmentRepository.countByUserIdAndStatus(user.getId(), "COMPLETED"));
-        // Feedback check removed for simplicity.
 
         user.setAppointmentsCompleted(completedAppointments);
         user.setAchievementBadges(String.join(",", determineBadges(user)));
@@ -407,14 +389,6 @@ public class UserService {
     private void deleteUserAndRelations(User user) {
         Long userId = user.getId();
 
-        beauticianRepository.findByUserId(userId).ifPresent(beautician -> {
-            appointmentRepository.findByBeauticianId(beautician.getId()).forEach(appointment -> {
-                appointment.setBeautician(null);
-                appointmentRepository.save(appointment);
-            });
-            beauticianRepository.delete(beautician);
-        });
-
         appointmentRepository.findByUserId(userId).forEach(appointment -> {
             appointment.setUser(null);
             appointmentRepository.save(appointment);
@@ -431,3 +405,4 @@ public class UserService {
         return value == null ? 0 : value;
     }
 }
+

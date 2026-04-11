@@ -38,10 +38,6 @@ public class Appointment {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "beautician_id")
-    private Beautician beautician;
-
     @Column(nullable = false)
     private Boolean rewardProcessed = false;
 }

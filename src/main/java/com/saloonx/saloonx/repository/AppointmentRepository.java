@@ -21,24 +21,4 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByUserIdAndStatus(Long userId, String status);
 
     List<Appointment> findByAppointmentDate(LocalDate date);
-
-    List<Appointment> findByBeauticianId(Long beauticianId);
-
-    List<Appointment> findByBeauticianIdAndStatus(Long beauticianId, String status);
-
-    List<Appointment> findByBeauticianIdAndAppointmentDate(Long beauticianId, LocalDate date);
-
-    @Query("SELECT a FROM Appointment a WHERE a.beautician.id = :beauticianId AND a.status = :status ORDER BY a.appointmentDate ASC, a.appointmentTime ASC")
-    List<Appointment> findByBeauticianIdAndStatusOrderByDate(
-            @Param("beauticianId") Long beauticianId,
-            @Param("status") String status
-    );
-
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.beautician.id = :beauticianId AND a.appointmentDate = :date AND a.status != 'CANCELLED'")
-    Long countAppointmentsByBeauticianAndDate(
-            @Param("beauticianId") Long beauticianId,
-            @Param("date") LocalDate date
-    );
-
-    List<Appointment> findByBeauticianIsNullAndStatusOrderByAppointmentDateAscAppointmentTimeAsc(String status);
 }

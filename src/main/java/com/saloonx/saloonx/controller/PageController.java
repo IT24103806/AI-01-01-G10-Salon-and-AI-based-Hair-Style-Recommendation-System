@@ -1,10 +1,8 @@
 package com.saloonx.saloonx.controller;
 
 import com.saloonx.saloonx.model.Appointment;
-import com.saloonx.saloonx.model.Beautician;
 import com.saloonx.saloonx.model.User;
 import com.saloonx.saloonx.service.AppointmentService;
-import com.saloonx.saloonx.service.BeauticianService;
 import com.saloonx.saloonx.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Controller
 public class PageController {
@@ -33,9 +28,6 @@ public class PageController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private BeauticianService beauticianService;
-
     @GetMapping("/")
     public String home() {
         return "index";
@@ -44,11 +36,6 @@ public class PageController {
     @GetMapping("/ai-hairstyle")
     public String aiHairstyle() {
         return "hairstyle-ai";
-    }
-
-    @GetMapping("/services")
-    public String services() {
-        return "services";
     }
 
     @GetMapping("/appointment")
@@ -108,11 +95,6 @@ public class PageController {
         return "home";
     }
 
-    @GetMapping("/about")
-    public String about() {
-        return "about";
-    }
-
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -154,111 +136,6 @@ public class PageController {
         }
     }
 
-    @GetMapping("/beautician-signup")
-    public String beauticianSignup() {
-        return "beautician-signup";
-    }
-
-    @PostMapping("/beautician-signup")
-    public String beauticianSignup(@RequestParam String name,
-                                   @RequestParam String email,
-                                   @RequestParam String password,
-                                   @RequestParam String confirmPassword,
-                                   Model model) {
-        if (!password.equals(confirmPassword)) {
-            model.addAttribute("error", "Passwords do not match");
-            return "beautician-signup";
-        }
-        try {
-            User user = new User();
-            user.setFullName(name);
-            user.setEmail(email);
-            user.setPassword(password);
-            userService.registerUserWithRole(user, "BEAUTICIAN");
-            return "redirect:/login?beauticianRegistered";
-        } catch (Exception e) {
-            model.addAttribute("error", "Registration failed: " + e.getMessage());
-            return "beautician-signup";
-        }
-    }
-
-    @GetMapping("/profile")
-    public String profile(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/login";
-        }
-
-        User refreshedUser = userService.getUserById(user.getId()).orElse(user);
-        session.setAttribute("user", refreshedUser);
-        Map<String, Object> profileSummary = userService.buildProfileSummary(refreshedUser);
-        model.addAttribute("profileSummary", profileSummary);
-
-        if ("BEAUTICIAN".equals(refreshedUser.getRole())) {
-            beauticianService.getBeauticianByUserId(refreshedUser.getId())
-                    .ifPresent(beautician -> model.addAttribute("beautician", beautician));
-            return "beautician-profile";
-        }
-        return "profile";
-    }
-
-    @PostMapping("/profile")
-    public String updateProfile(@RequestParam String fullName,
-                                @RequestParam String email,
-                                @RequestParam(required = false) String password,
-                                @RequestParam(required = false) String confirmPassword,
-                                HttpSession session,
-                                Model model) {
-
-        User currentUser = (User) session.getAttribute("user");
-        if (currentUser == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            currentUser.setFullName(fullName);
-            currentUser.setEmail(email);
-
-            String newPassword = null;
-            if (password != null && !password.isEmpty()) {
-                if (!password.equals(confirmPassword)) {
-                    model.addAttribute("error", "New passwords do not match.");
-                    attachProfileModel(currentUser, session, model);
-                    return "BEAUTICIAN".equals(currentUser.getRole()) ? "beautician-profile" : "profile";
-                }
-                newPassword = password;
-            }
-
-            User updatedUser = userService.updateUser(currentUser, newPassword);
-            session.setAttribute("user", updatedUser);
-            model.addAttribute("success", "Profile updated successfully!");
-            attachProfileModel(updatedUser, session, model);
-        } catch (Exception e) {
-            model.addAttribute("error", "Update failed: " + e.getMessage());
-            attachProfileModel(currentUser, session, model);
-        }
-
-        return "BEAUTICIAN".equals(currentUser.getRole()) ? "beautician-profile" : "profile";
-    }
-
-    @PostMapping("/profile/delete")
-    public String deleteProfile(@RequestParam String password, HttpSession session, Model model) {
-        User currentUser = (User) session.getAttribute("user");
-        if (currentUser == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            userService.deleteUser(currentUser, password);
-            session.invalidate();
-            return "redirect:/login?deleted";
-        } catch (Exception e) {
-            model.addAttribute("error", "Deletion failed: " + e.getMessage());
-            attachProfileModel(currentUser, session, model);
-            return "BEAUTICIAN".equals(currentUser.getRole()) ? "beautician-profile" : "profile";
-        }
-    }
-
     @GetMapping("/my-appointments")
     public String myAppointments(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -268,27 +145,6 @@ public class PageController {
         List<Appointment> appointments = appointmentService.getAppointmentsByUserId(user.getId());
         model.addAttribute("appointments", appointments);
         return "my-appointments";
-    }
-
-
-    @GetMapping("/beautician-bookings")
-    public String beauticianBookings(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null || !"BEAUTICIAN".equals(user.getRole())) {
-            return "redirect:/login";
-        }
-
-        Optional<Beautician> beauticianOpt = beauticianService.getBeauticianByUserId(user.getId());
-        if (beauticianOpt.isEmpty()) {
-            return "redirect:/beautician/profile/create";
-        }
-        if (!beauticianService.isApproved(beauticianOpt.get())) {
-            return "redirect:/beautician/profile?approvalPending";
-        }
-
-        List<Appointment> bookings = appointmentService.getAllAppointments();
-        model.addAttribute("bookings", bookings != null ? bookings : Collections.emptyList());
-        return "beautician-bookings";
     }
 
     @PostMapping("/my-appointments/delete/{id}")
@@ -342,15 +198,5 @@ public class PageController {
         return appointmentService.getBookedTimesByDate(localDate).stream()
                 .map(time -> time.format(formatter))
                 .toList();
-    }
-
-    private void attachProfileModel(User user, HttpSession session, Model model) {
-        User refreshedUser = userService.getUserById(user.getId()).orElse(user);
-        session.setAttribute("user", refreshedUser);
-        model.addAttribute("profileSummary", userService.buildProfileSummary(refreshedUser));
-        if ("BEAUTICIAN".equals(refreshedUser.getRole())) {
-            beauticianService.getBeauticianByUserId(refreshedUser.getId())
-                    .ifPresent(beautician -> model.addAttribute("beautician", beautician));
-        }
     }
 }
