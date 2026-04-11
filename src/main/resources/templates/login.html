@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Salon Oski</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<header class="nav-light">
+    <h1><img src="/images/logo.jpg" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">Salon Oski</h1>
+    <nav>
+        <a href="/home">Home</a>
+        <a href="/appointment">Appointments</a>
+        <a href="/ai-hairstyle">AI Hair Design</a>
+    </nav>
+    <a href="/login" class="btn-purple" style="margin-left:auto;">Login</a>
+</header>
+
+<main>
+    <section class="appointment-section" style="min-height: 100vh; padding-top: 100px;">
+        <div class="appointment-card" style="max-width: 500px;">
+            <h2>Welcome Back</h2>
+            <div th:if="${param.registered}" style="color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Account created successfully. You can log in now.</div>
+            <div th:if="${param.deleted}" style="color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Your account was deleted successfully.</div>
+            <div th:if="${param.logout}" style="color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">You have been signed out.</div>
+            <div th:if="${param.error}" style="color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem;">Invalid email or password.</div>
+
+            <form action="/login" method="post">
+                <div th:if="${error}" style="color: red; margin-bottom: 1rem; text-align: center;"><span th:text="${error}"></span></div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-purple btn-block" style="margin-top: 1rem;">Login</button>
+                <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #666; line-height: 1.7;">
+                    <a href="#" style="color: #666; text-decoration: none;">Forgot Password?</a>
+                    <br><br>
+                    Don't have an account? <a href="/signup" style="color: #000; font-weight: 600;">Sign Up</a>
+                </div>
+            </form>
+
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - SalonX Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#00000b; --bg:#f8f9fa; --card:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --shadow:0 10px 28px rgba(15,23,42,0.08); --danger:#b91c1c; --success:#166534; --warning:#92400e; }
+        body { font-family:'Outfit', sans-serif; margin:0; background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+        .sidebar { width:280px; background:var(--primary); color:white; height:100vh; padding:2.5rem 1.5rem 5rem; position:fixed; left:0; top:0; box-sizing:border-box; display:flex; flex-direction:column; overflow-y:auto; }
+        .sidebar h2 { font-weight:700; margin-bottom:3rem; font-size:1.5rem; color:white; display:flex; align-items:center; }
+        .sidebar h2 img { height:35px; width:35px; border-radius:50%; margin-right:12px; object-fit:cover; }
+        .nav-link { display:flex; align-items:center; padding:0.85rem 1.25rem; color:rgba(255,255,255,0.7); text-decoration:none; border-radius:8px; transition:all 0.3s; margin-bottom:0.75rem; }
+        .nav-link:hover, .nav-link.active { background:rgba(255,255,255,0.1); color:white; }
+        .nav-link i { margin-right:12px; width:20px; text-align:center; }
+        .main { flex:1; margin-left:280px; padding:2.5rem; }
+        .page-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; margin-bottom:2rem; flex-wrap:wrap; }
+        .page-head h1 { margin:0; font-size:2.3rem; }
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem; }
+        .card { background:var(--card); border-radius:18px; padding:1.25rem; box-shadow:var(--shadow); }
+        .stat-label { color:var(--muted); font-size:0.82rem; letter-spacing:0.04em; }
+        .stat-value { margin-top:0.45rem; font-size:2rem; font-weight:700; }
+        .panel-grid { display:grid; grid-template-columns:repeat(12, 1fr); gap:1rem; }
+        .span-6 { grid-column:span 6; }
+        .span-12 { grid-column:span 12; }
+        .panel { background:var(--card); border-radius:18px; padding:1.5rem; box-shadow:var(--shadow); }
+        .panel h2 { margin-top:0; margin-bottom:1rem; }
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.85rem; }
+        label { display:block; font-size:0.85rem; color:var(--muted); margin-bottom:0.35rem; }
+        input, select, textarea { width:100%; box-sizing:border-box; padding:0.75rem 0.85rem; border:1px solid var(--border); border-radius:12px; font:inherit; background:#fff; }
+        textarea { min-height:92px; resize:vertical; }
+        button { border:none; background:#111827; color:white; border-radius:12px; padding:0.8rem 1rem; font-weight:600; cursor:pointer; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:0.9rem 0.75rem; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+        th { color:var(--muted); font-size:0.8rem; }
+        .pill { display:inline-block; padding:0.28rem 0.6rem; border-radius:999px; font-size:0.78rem; font-weight:700; }
+        .pill-danger { background:#fee2e2; color:var(--danger); }
+        .pill-warning { background:#fef3c7; color:var(--warning); }
+        .pill-success { background:#dcfce7; color:var(--success); }
+        .alert { padding:0.9rem 1rem; border-radius:12px; margin-bottom:1rem; background:#f0fdf4; color:var(--success); }
+        @media (max-width: 1200px) { .span-6 { grid-column:span 12; } }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2><img src="/images/logo.jpg" alt="Logo"> Admin Panel</h2>
+    <a href="/admin/dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a href="/admin/accounting" class="nav-link"><i class="fas fa-chart-line"></i> Accounting</a>
+    <a href="/admin/inventory" class="nav-link active"><i class="fas fa-boxes-stacked"></i> Inventory</a>
+    <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Registered Users</a>
+    <a href="/admin/appointments" class="nav-link"><i class="fas fa-calendar-check"></i> Appointments</a>
+    <a href="/admin/logs" class="nav-link"><i class="fas fa-clipboard-list"></i> Company Logs</a>
+    <a href="/admin/feedback" class="nav-link"><i class="fas fa-comment-alt"></i> Manage Feedback</a>
+    <a href="/admin/notifications" class="nav-link"><i class="fas fa-bell"></i> Send Notifications</a>
+    <div style="margin-top: auto;">
+        <a href="/home" class="nav-link"><i class="fas fa-external-link-alt"></i> View Website</a>
+        <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    </div>
+</div>
+
+<main class="main">
+    <div class="page-head">
+        <div>
+            <h1>Inventory Management</h1>
+            <p style="margin:0.35rem 0 0; color:#6b7280;">Search-first stock control with auto-generated SKUs, purchase receiving, service consumption rules, and accounting integration.</p>
+        </div>
+    </div>
+
+    <div th:if="${param.productSaved}" class="alert">Product saved successfully.</div>
+    <div th:if="${param.supplierSaved}" class="alert">Supplier saved successfully.</div>
+    <div th:if="${param.purchaseSaved}" class="alert">Purchase received and posted to accounting.</div>
+    <div th:if="${param.adjustmentSaved}" class="alert">Stock adjustment recorded.</div>
+    <div th:if="${param.requirementSaved}" class="alert">Service-product requirement saved.</div>
+
+    <section class="stats-grid">
+        <div class="card"><div class="stat-label">Products</div><div class="stat-value" th:text="${totalProducts}">0</div></div>
+        <div class="card"><div class="stat-label">Low Stock</div><div class="stat-value" th:text="${lowStockCount}">0</div></div>
+        <div class="card"><div class="stat-label">Out Of Stock</div><div class="stat-value" th:text="${outOfStockCount}">0</div></div>
+        <div class="card"><div class="stat-label">Inventory Value</div><div class="stat-value" th:text="|Rs ${#numbers.formatDecimal(totalInventoryValue, 1, 2)}|">Rs 0.00</div></div>
+    </section>
+
+    <section class="panel-grid">
+        <div class="panel span-6">
+            <h2>Add Product</h2>
+            <form method="post" action="/admin/inventory/products">
+                <div class="form-grid">
+                    <div><label>Name</label><input name="name" required></div>
+                    <div><label>Brand</label><input name="brand"></div>
+                    <div><label>Category</label><input name="category"></div>
+                    <div><label>Unit</label><input name="unit" placeholder="bottle, tube, ml"></div>
+                    <div><label>Barcode</label><input name="barcode"></div>
+                    <div><label>Reorder Level</label><input type="number" step="0.01" name="reorderLevel" value="0"></div>
+                    <div><label>Unit Cost</label><input type="number" step="0.01" name="unitCost" value="0"></div>
+                    <div><label>Selling Price</label><input type="number" step="0.01" name="sellingPrice" value="0"></div>
+                    <div style="grid-column:1 / -1;"><label>Description</label><textarea name="description"></textarea></div>
+                    <div style="grid-column:1 / -1;"><label>Search Keywords</label><input name="searchKeywords" placeholder="shampoo, loreal, repair, hair care"></div>
+                </div>
+                <div style="margin-top:1rem;"><button type="submit">Save Product</button></div>
+            </form>
+        </div>
+
+        <div class="panel span-6">
+            <h2>Add Supplier</h2>
+            <form method="post" action="/admin/inventory/suppliers">
+                <div class="form-grid">
+                    <div><label>Name</label><input name="name" required></div>
+                    <div><label>Contact Person</label><input name="contactPerson"></div>
+                    <div><label>Email</label><input type="email" name="email"></div>
+                    <div><label>Phone</label><input name="phone"></div>
+                    <div><label>Payment Terms</label><input name="paymentTerms" placeholder="NET_30"></div>
+                    <div><label>Tax ID</label><input name="taxId"></div>
+                    <div style="grid-column:1 / -1;"><label>Address</label><textarea name="address"></textarea></div>
+                </div>
+                <div style="margin-top:1rem;"><button type="submit">Save Supplier</button></div>
+            </form>
+        </div>
+
+        <div class="panel span-6">
+            <h2>Receive Purchase</h2>
+            <form method="post" action="/admin/inventory/purchases">
+                <div class="form-grid">
+                    <div>
+                        <label>Supplier</label>
+                        <select name="supplierId" required>
+                            <option value="">Select supplier</option>
+                            <option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.name}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Product</label>
+                        <select name="productId" required>
+                            <option value="">Select product</option>
+                            <option th:each="product : ${products}" th:value="${product.id}" th:text="|${product.name} (${product.brand ?: 'No brand'})|"></option>
+                        </select>
+                    </div>
+                    <div><label>Quantity</label><input type="number" step="0.01" name="quantity" required></div>
+                    <div><label>Unit Price</label><input type="number" step="0.01" name="unitPrice" required></div>
+                    <div><label>Expected Delivery</label><input type="date" name="expectedDeliveryDate"></div>
+                    <div style="grid-column:1 / -1;"><label>Notes</label><textarea name="notes" placeholder="Invoice number, supplier note, batch note"></textarea></div>
+                </div>
+                <div style="margin-top:1rem;"><button type="submit">Receive Stock</button></div>
+            </form>
+        </div>
+
+        <div class="panel span-6">
+            <h2>Manual Stock Adjustment</h2>
+            <form method="post" action="/admin/inventory/adjustments">
+                <div class="form-grid">
+                    <div>
+                        <label>Product</label>
+                        <select name="productId" required>
+                            <option value="">Select product</option>
+                            <option th:each="product : ${products}" th:value="${product.id}" th:text="|${product.name} - Stock ${#numbers.formatDecimal(product.currentStock, 1, 2)}|"></option>
+                        </select>
+                    </div>
+                    <div><label>Quantity Delta</label><input type="number" step="0.01" name="quantityDelta" placeholder="+5 or -2" required></div>
+                    <div style="grid-column:1 / -1;"><label>Reason</label><textarea name="notes" placeholder="Damage, wastage, opening balance correction, manual count correction"></textarea></div>
+                </div>
+                <div style="margin-top:1rem;"><button type="submit">Record Adjustment</button></div>
+            </form>
+        </div>
+
+        <div class="panel span-6">
+            <h2>Map Products To Service</h2>
+            <form method="post" action="/admin/inventory/requirements">
+                <div class="form-grid">
+                    <div><label>Service Name</label><input name="serviceName" placeholder="haircut, color, beard, massage" required></div>
+                    <div>
+                        <label>Product</label>
+                        <select name="productId" required>
+                            <option value="">Select product</option>
+                            <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name}"></option>
+                        </select>
+                    </div>
+                    <div><label>Quantity Used</label><input type="number" step="0.01" name="quantityUsed" required></div>
+                    <div>
+                        <label>Mandatory</label>
+                        <select name="mandatory">
+                            <option value="true">Yes</option>
+                            <option value="false">Optional</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:1rem;"><button type="submit">Save Requirement</button></div>
+            </form>
+        </div>
+
+        <div class="panel span-6">
+            <h2>Low Stock Alerts</h2>
+            <table>
+                <thead><tr><th>Product</th><th>Stock</th><th>Reorder</th><th>Status</th></tr></thead>
+                <tbody>
+                <tr th:each="product : ${lowStockProducts}">
+                    <td>
+                        <div style="font-weight:700;" th:text="${product.name}">Product</div>
+                        <div style="color:#6b7280; font-size:0.85rem;" th:text="|${product.brand ?: 'No brand'} - ${product.category ?: 'Uncategorized'}|">Meta</div>
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(product.currentStock, 1, 2)}">0</td>
+                    <td th:text="${#numbers.formatDecimal(product.reorderLevel, 1, 2)}">0</td>
+                    <td>
+                        <span th:if="${product.currentStock <= 0}" class="pill pill-danger">Out of stock</span>
+                        <span th:if="${product.currentStock > 0}" class="pill pill-warning">Reorder now</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(lowStockProducts)}"><td colspan="4" style="color:#6b7280;">No low stock alerts right now.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel span-6">
+            <h2>Service Consumption Rules</h2>
+            <table>
+                <thead><tr><th>Service</th><th>Product</th><th>Qty</th><th>Rule</th></tr></thead>
+                <tbody>
+                <tr th:each="req : ${serviceRequirements}">
+                    <td th:text="${req.serviceName}">Service</td>
+                    <td th:text="${req.product.name}">Product</td>
+                    <td th:text="${#numbers.formatDecimal(req.quantityUsed, 1, 2)}">0</td>
+                    <td><span th:class="${req.mandatory} ? 'pill pill-success' : 'pill pill-warning'" th:text="${req.mandatory} ? 'Mandatory' : 'Optional'">Mandatory</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(serviceRequirements)}"><td colspan="4" style="color:#6b7280;">No service-product mappings configured yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel span-12">
+            <h2>Products</h2>
+            <table>
+                <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Unit Cost</th><th>Selling Price</th><th>Reorder</th></tr></thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td>
+                        <div style="font-weight:700;" th:text="${product.name}">Product</div>
+                        <div style="color:#6b7280; font-size:0.85rem;" th:text="|${product.brand ?: 'No brand'} - ${product.category ?: 'Uncategorized'}|">Meta</div>
+                    </td>
+                    <td th:text="${product.sku}">SKU</td>
+                    <td th:text="${#numbers.formatDecimal(product.currentStock, 1, 2)}">0</td>
+                    <td th:text="|Rs ${#numbers.formatDecimal(product.unitCost, 1, 2)}|">Rs 0.00</td>
+                    <td th:text="|Rs ${#numbers.formatDecimal(product.sellingPrice, 1, 2)}|">Rs 0.00</td>
+                    <td th:text="${#numbers.formatDecimal(product.reorderLevel, 1, 2)}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(products)}"><td colspan="6" style="color:#6b7280;">No products yet. Add your first product above.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel span-12">
+            <h2>Recent Stock Movements</h2>
+            <table>
+                <thead><tr><th>Time</th><th>Product</th><th>Type</th><th>Qty</th><th>Stock Change</th><th>Reference</th><th>By</th></tr></thead>
+                <tbody>
+                <tr th:each="txn : ${recentStockTransactions}">
+                    <td th:text="${#temporals.format(txn.createdAt, 'dd MMM yyyy HH:mm')}">Date</td>
+                    <td th:text="${txn.product.name}">Product</td>
+                    <td th:text="${txn.transactionType}">Type</td>
+                    <td th:text="${#numbers.formatDecimal(txn.quantity, 1, 2)}">0</td>
+                    <td th:text="|${#numbers.formatDecimal(txn.previousStock,1,2)} -> ${#numbers.formatDecimal(txn.newStock,1,2)}|">0 -> 0</td>
+                    <td th:text="${txn.referenceType != null ? txn.referenceType + ' #' + txn.referenceId : '-'}">Reference</td>
+                    <td th:text="${txn.performedBy}">system</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentStockTransactions)}"><td colspan="7" style="color:#6b7280;">No stock movements recorded yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>
+

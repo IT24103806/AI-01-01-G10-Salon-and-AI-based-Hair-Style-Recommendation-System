@@ -1,0 +1,43 @@
+package com.saloonx.saloonx.security;
+
+import com.saloonx.saloonx.model.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+
+public class SalonUserDetails implements UserDetails, SalonAuthenticatedUser {
+
+    private final User user;
+
+    public SalonUserDetails(User user) {
+        this.user = user;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getEmail();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return !"DISABLED".equalsIgnoreCase(user.getAccountStatus());
+    }
+
+    @Override
+    public User getAppUser() {
+        return user;
+    }
+}

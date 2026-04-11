@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - Salon Oski</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<header class="nav-light">
+    <h1>
+        <img src="/images/logo.jpg" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+        Salon Oski
+    </h1>
+    <nav>
+        <a href="/home">Home</a>
+        <a href="/appointment">Appointments</a>
+        <a href="/ai-hairstyle">AI Hair Design</a>
+    </nav>
+    <a href="/login" class="btn-purple" style="margin-left:auto;">Login</a>
+</header>
+
+<main>
+    <section class="appointment-section" style="min-height: 100vh; padding-top: 100px;">
+        <div class="appointment-card" style="max-width: 520px;">
+            <h2>Create Account</h2>
+            <p style="margin-bottom: 1rem; color: #666;">
+                Create your Salon Oski account.
+            </p>
+
+            <form action="/signup" method="post">
+                <div th:if="${error}" style="color: red; margin-bottom: 1rem; text-align: center;">
+                    <span th:text="${error}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" 
+                        placeholder="At least 10 characters with letters and numbers" 
+                        minlength="10" 
+                        pattern="^(?=.*[A-Za-z])(?=.*\d).{10,}$" 
+                        title="Password must be at least 10 characters long and contain both letters and numbers." 
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="referralCode">
+                        Referral Code <span style="color:#666; font-weight:400;">(Optional)</span>
+                    </label>
+                    <input type="text" id="referralCode" name="referralCode" th:value="${submittedReferralCode}" placeholder="Use a friend's code for bonus points">
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1rem; margin:1rem 0 0.5rem; color:#475569; font-size:0.9rem; line-height:1.6;">
+                    Earn loyalty points from completed appointments, reviews, and successful referrals.
+                </div>
+
+                <button type="submit" class="btn-purple btn-block" style="margin-top: 1rem;">Create Account</button>
+
+                <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #666;">
+                    Already have an account? <a href="/login" style="color: #000; font-weight: 600;">Login</a>
+                </div>
+            </form>
+
+        </div>
+    </section>
+</main>
+</body>
+</html>

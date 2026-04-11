@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Bookings - Salon Oski</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .bookings-container {
+            max-width: 1200px;
+            margin: 100px auto;
+            padding: 2rem;
+        }
+        .bookings-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .bookings-header h1 {
+            font-size: 2.5rem;
+            color: #00000b;
+        }
+        .booking-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #00000b;
+        }
+        .booking-item.pending {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        .booking-item.confirmed {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        .booking-item.cancelled {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .booking-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        .booking-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .booking-service {
+            background: #f0f0f0;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-PENDING {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-CONFIRMED {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-CANCELLED {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-COMPLETED {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .booking-item.completed {
+            border-left-color: #17a2b8;
+            background: #f0f9ff;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-accept {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-view {
+            background: #6b7280;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .btn-complete {
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .no-data {
+            text-align: center;
+            padding: 5rem;
+            color: #888;
+        }
+        @media (max-width: 768px) {
+            .booking-item {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header class="nav-light">
+    <h1>Salon Oski</h1>
+    <nav>
+        <a href="/home">Home</a>
+        <a href="/beautician/dashboard">Beautician Dashboard</a>
+        <a href="/beautician-bookings" class="active">Client Bookings</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/ai-hairstyle">AI Hair Design</a>
+        <a href="/about">About Us</a>
+    </nav>
+    <div th:if="${session.user}" class="profile-dropdown">
+        <a class="dropdown-toggle" th:text="${session.user.fullName}"></a>
+        <div class="dropdown-menu">
+            <a href="/beautician/profile">Professional Profile</a>
+            <a href="/notifications">Notifications</a>
+            <a href="/my-appointments">My Appointments</a>
+            <a href="/beautician-bookings">Client Bookings</a>
+            <a href="/readFeedback">My Feedback</a>
+            <div class="divider"></div>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <a th:unless="${session.user}" href="/login" class="btn-purple">Login</a>
+</header>
+
+<main class="bookings-container">
+    <div class="bookings-header">
+        <h1>Client Bookings</h1>
+        <p>Manage your appointment requests</p>
+    </div>
+
+    <!-- Booking list -->
+    <div th:each="booking : ${bookings}" th:class="${'booking-item ' + (booking.status != null ? booking.status.toLowerCase() : 'pending')}">
+        <div class="booking-info">
+            <h3 th:text="${booking.customerName}">Customer Name</h3>
+            <p><i class="fas fa-phone"></i> <span th:text="${booking.customerPhone}">123-456-7890</span></p>
+            <p><i class="fas fa-calendar"></i>
+                <span th:text="${#temporals.format(booking.appointmentDate, 'dd MMM yyyy')}">Date</span> at
+                <span th:text="${booking.appointmentTime}">Time</span>
+            </p>
+        </div>
+
+        <div class="booking-service" th:text="${booking.service}">Service</div>
+
+        <div>
+            <span th:class="${'status-badge status-' + (booking.status != null ? booking.status : 'PENDING')}" th:text="${booking.status != null ? booking.status : 'PENDING'}">PENDING</span>
+        </div>
+
+        <div class="btn-group">
+            <!-- Accept button for PENDING appointments -->
+            <form th:if="${booking.status == 'PENDING'}"
+                  th:action="@{'/beautician/appointment/update-status/' + ${booking.id}}"
+                  method="post">
+                <input type="hidden" name="status" value="CONFIRMED">
+                <button type="submit" class="btn-accept">✓ Accept</button>
+            </form>
+
+            <!-- Reject button for PENDING appointments -->
+            <form th:if="${booking.status == 'PENDING'}"
+                  th:action="@{'/beautician/appointment/update-status/' + ${booking.id}}"
+                  method="post">
+                <input type="hidden" name="status" value="CANCELLED">
+                <button type="submit" class="btn-reject">✗ Reject</button>
+            </form>
+
+            <!-- Complete button for CONFIRMED appointments -->
+            <form th:if="${booking.status == 'CONFIRMED'}"
+                  th:action="@{'/beautician/appointment/update-status/' + ${booking.id}}"
+                  method="post">
+                <input type="hidden" name="status" value="COMPLETED">
+                <button type="submit" class="btn-complete">✓ Complete</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- No bookings message -->
+    <div th:if="${bookings == null or bookings.isEmpty()}" class="no-data">
+        <i class="fas fa-calendar-times" style="font-size: 4rem; opacity: 0.3;"></i>
+        <p>No client bookings found.</p>
+    </div>
+</main>
+
+<footer style="text-align: center; padding: 2rem; color: #888;">
+    <p>© 2026 Salon Oski</p>
+</footer>
+</body>
+
+</html>

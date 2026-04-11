@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Salon Accounting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/accounting.css}">
+</head>
+
+<body>
+
+
+  <header class="header">
+    <div class="header-content">
+      <h1>Salon Accounting Dashboard</h1>
+      <nav>
+        <a href="/home" style="color: white; margin-left: 20px;">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Dashboard Stats -->
+    <section class="stats-section">
+      <!-- Daily -->
+      <div class="stat-card income">
+        <h3>Daily Income</h3>
+        <p id="dailyIncome">Rs 0</p>
+      </div>
+      <div class="stat-card expense">
+        <h3>Daily Expense</h3>
+        <p id="dailyExpense">Rs 0</p>
+      </div>
+      <div class="stat-card profit">
+        <h3>Daily Profit</h3>
+        <p id="dailyProfit">Rs 0</p>
+      </div>
+
+      <!-- Monthly -->
+      <div class="stat-card income">
+        <h3>Monthly Income</h3>
+        <p id="monthlyIncome">Rs 0</p>
+      </div>
+      <div class="stat-card expense">
+        <h3>Monthly Expense</h3>
+        <p id="monthlyExpense">Rs 0</p>
+      </div>
+      <div class="stat-card profit">
+        <h3>Monthly Profit</h3>
+        <p id="monthlyProfit">Rs 0</p>
+      </div>
+
+      <!-- Yearly -->
+      <div class="stat-card income">
+        <h3>Yearly Income</h3>
+        <p id="yearlyIncome">Rs 0</p>
+      </div>
+      <div class="stat-card expense">
+        <h3>Yearly Expense</h3>
+        <p id="yearlyExpense">Rs 0</p>
+      </div>
+      <div class="stat-card profit">
+        <h3>Yearly Profit</h3>
+        <p id="yearlyProfit">Rs 0</p>
+      </div>
+    </section>
+
+    <!-- Charts (Doughnut & Trend) -->
+    <section class="charts-section">
+      <div class="chart-container">
+        <h3>Current Month Overview</h3>
+        <div class="chart-wrapper">
+          <canvas id="incomeExpenseChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0;">Performance Analysis</h3>
+          <div style="display: flex; gap: 8px;">
+            <select id="trendView" onchange="switchTrendView()"
+              style="padding: 4px 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.85rem;">
+              <option value="snapshot">Quick Snapshot</option>
+              <option value="monthly">Monthly History</option>
+              <option value="yearly">Yearly Trends</option>
+            </select>
+            <select id="trendYear" onchange="switchTrendView()"
+              style="padding: 4px 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.85rem; display: none;">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Transaction -->
+    <section class="form-section">
+      <h2>Add New Transaction</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="desc" placeholder="e.g. Haircut Service">
+        </div>
+
+        <div class="form-group">
+          <label>Amount (Rs)</label>
+          <input type="number" id="amount" placeholder="e.g. 2500">
+        </div>
+
+        <div class="form-group">
+          <label>Type</label>
+          <select id="type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="date">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="createTransaction()">Add Transaction</button>
+    </section>
+
+    <!-- Transaction Table -->
+    <section class="table-section">
+      <h2>Recent Transactions</h2>
+
+      <div class="filter-controls">
+        <button onclick="fetchTransactions()">Refresh Data</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Amount (Rs)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="transactionTable">
+          <!-- JS loads data here -->
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script th:src="@{/js/accounting.js}"></script>
+
+</body>
+
+</html>

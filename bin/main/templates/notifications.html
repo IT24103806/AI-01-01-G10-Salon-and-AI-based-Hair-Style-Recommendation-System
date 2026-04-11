@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Salon Oski</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-light">
+    <header class="nav-light">
+        <h1><img src="/images/logo.jpg" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+            Salon Oski</h1>
+        <nav>
+            <a href="/home">Home</a>
+            <a href="/services">Services</a>
+            <a href="/appointment">Appointments</a>
+            <a href="/ai-hairstyle">AI Hair Design</a>
+            <a href="/about">About Us</a>
+        </nav>
+        <div th:if="${session.user}" class="profile-dropdown" style="margin-left: auto;">
+            <a class="dropdown-toggle" th:text="${session.user.fullName}"></a>
+            <div class="dropdown-menu">
+                <a href="/profile" class="text-accent"><i class="fas fa-user-edit"></i> [[${session.user.role ==
+                    'BEAUTICIAN' ? 'Professional Profile' : 'Edit Profile'}]]</a>
+                <a href="/notifications" class="text-accent"><i class="fas fa-bell"></i> Notifications
+                    <span th:if="${notificationCount != null and notificationCount > 0}"
+                        style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 50%; font-size: 0.7rem; margin-left: 5px; vertical-align: middle;"
+                        th:text="${notificationCount}"></span>
+                </a>
+                <a href="/my-appointments"><i class="fas fa-calendar-alt"></i> My Appointments</a>
+                <a th:if="${session.user.role == 'BEAUTICIAN'}" href="/beautician-bookings"><i
+                        class="fas fa-calendar-check"></i> Client Bookings</a>
+                <a href="/readFeedback"><i class="fas fa-comments"></i> My Feedback</a>
+                <a href="/logout" style="color: #ef4444 !important;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 100px 10%; min-height: 80vh;">
+        <h2 style="font-size: 2rem; margin-bottom: 2rem;">Notifications</h2>
+
+        <div th:if="${#lists.isEmpty(notifications)}"
+            style="background: white; padding: 3rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center;">
+            <i class="fas fa-bell-slash" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+            <p style="color: #666;">You have no new notifications at this time.</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(notifications)}" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div th:each="note : ${notifications}"
+                style="background: white; padding: 1.5rem 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-left: 5px solid #6366f1;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: #6366f1; font-weight: 600; text-transform: uppercase;">
+                        <i class="fas fa-info-circle"></i> System Message
+                    </span>
+                    <span style="font-size: 0.8rem; color: #999;"
+                        th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
+                </div>
+                <p style="color: #333; line-height: 1.6; margin: 0; font-size: 1.05rem;" th:text="${note.message}"></p>
+            </div>
+        </div>
+    </main>
+
+    <footer
+        style="padding: 2rem 0; text-align: center; color: #666; font-size: 0.9rem; border-top: 1px solid #eee; background: white;">
+        <p>© 2026 Salon Oski</p>
+    </footer>
+</body>
+
+</html>
