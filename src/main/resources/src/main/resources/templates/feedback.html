@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback - Salon Oski</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .feedback-note {
+            background: rgba(0, 0, 11, 0.05);
+            border-left: 4px solid #00000b;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 2rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #f59e0b;
+        }
+        .feedback-meta {
+            background: #fcfcfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+
+<header class="nav-light">
+    <h1>
+        <img src="/images/logo.jpg" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+        Salon Oski
+    </h1>
+    <nav>
+        <a href="/home">Home</a>
+        <a href="/services">Services</a>
+        <a href="/appointment">Appointments</a>
+        <a th:if="${session.user != null and session.user.role == 'BEAUTICIAN'}" href="/beautician-bookings">Client Bookings</a>
+        <a href="/feedback" class="text-accent">Feedback</a>
+        <a href="/ai-hairstyle">AI Hair Design</a>
+        <a href="/about">About Us</a>
+    </nav>
+    <div th:if="${session.user}" class="profile-dropdown" style="margin-left: auto;">
+        <a class="dropdown-toggle" th:text="${session.user.fullName}"></a>
+        <div class="dropdown-menu">
+            <a href="/profile" class="text-accent"><i class="fas fa-user-edit"></i> [[${session.user.role == 'BEAUTICIAN' ? 'Professional Profile' : 'Edit Profile'}]]</a>
+            <a href="/notifications"><i class="fas fa-bell"></i> Notifications</a>
+            <a href="/my-appointments"><i class="fas fa-calendar-alt"></i> My Appointments</a>
+            <a th:if="${session.user.role == 'BEAUTICIAN'}" href="/beautician-bookings"><i class="fas fa-calendar-check"></i> Client Bookings</a>
+            <a href="/readFeedback"><i class="fas fa-comments"></i> My Feedback</a>
+            <div class="divider"></div>
+            <a href="/logout" style="color: #ef4444 !important;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+    <a th:unless="${session.user}" href="/login" class="btn-purple" style="margin-left:auto;">Login</a>
+</header>
+
+<section class="feedback-section">
+    <div class="feedback-card">
+        <h2>Rate Your Beautician</h2>
+        <p th:text="${hasExistingFeedback} ? 'You already submitted feedback. Submit again here to update the same record.' : 'Leave a star rating and feedback for your beautician.'">Leave a star rating and feedback for your beautician.</p>
+
+        <div class="feedback-note" th:if="${hasExistingFeedback}">
+            One customer can keep only one feedback record. Submitting this form updates your existing feedback instead of creating duplicates.
+        </div>
+
+        <div class="feedback-meta" th:if="${prefilledFeedback != null}">
+            <strong>Beautician:</strong> <span th:text="${prefilledFeedback.beauticianName != null ? prefilledFeedback.beauticianName : 'Not Assigned Yet'}">Beautician Name</span>
+        </div>
+
+        <form action="/submit-feedback" method="POST">
+            <input type="hidden" name="id" th:if="${prefilledFeedback != null and prefilledFeedback.id != null}" th:value="${prefilledFeedback.id}">
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" pattern="[A-Za-z\s]{3,50}" title="Only letters allowed (3-50 characters)" th:value="${prefilledFeedback != null ? prefilledFeedback.name : ''}" required readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" th:value="${prefilledFeedback != null ? prefilledFeedback.email : ''}" required readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" name="phone" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" title="Enter a valid 10-digit phone number" th:value="${prefilledFeedback != null ? prefilledFeedback.phone : ''}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Appointment</label>
+                <input type="date" name="appointmentDate" th:value="${prefilledFeedback != null and prefilledFeedback.appointmentDate != null ? prefilledFeedback.appointmentDate : ''}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Star Rating</label>
+                <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" th:checked="${prefilledFeedback != null and prefilledFeedback.rating == 5}" required>
+                    <label for="star5" title="5 stars">&#9733;</label>
+                    <input type="radio" id="star4" name="rating" value="4" th:checked="${prefilledFeedback != null and prefilledFeedback.rating == 4}">
+                    <label for="star4" title="4 stars">&#9733;</label>
+                    <input type="radio" id="star3" name="rating" value="3" th:checked="${prefilledFeedback != null and prefilledFeedback.rating == 3}">
+                    <label for="star3" title="3 stars">&#9733;</label>
+                    <input type="radio" id="star2" name="rating" value="2" th:checked="${prefilledFeedback != null and prefilledFeedback.rating == 2}">
+                    <label for="star2" title="2 stars">&#9733;</label>
+                    <input type="radio" id="star1" name="rating" value="1" th:checked="${prefilledFeedback != null and prefilledFeedback.rating == 1}">
+                    <label for="star1" title="1 star">&#9733;</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Your Feedback</label>
+                <textarea name="message" rows="4" minlength="10" maxlength="500" placeholder="Write your experience with the beautician here..." required th:text="${prefilledFeedback != null ? prefilledFeedback.message : ''}"></textarea>
+            </div>
+
+            <button type="submit" class="btn-purple btn-block" th:text="${hasExistingFeedback} ? 'Update Feedback' : 'Submit Feedback'">Submit Feedback</button>
+        </form>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2026 Salon Oski</p>
+</footer>
+
+</body>
+</html>
