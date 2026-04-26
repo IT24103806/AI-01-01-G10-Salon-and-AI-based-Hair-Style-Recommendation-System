@@ -15,16 +15,13 @@ public class FeedbackService {
     public FeedbackService(FeedbackRepository repository) {
         this.repository = repository;
     }
-
     public Feedback saveFeedback(Feedback feedback) {
         return repository.save(feedback);
     }
-
     public Feedback getFeedbackById(Long id) {
         Optional<Feedback> feedback = repository.findById(id);
         return feedback.orElse(null);
     }
-
     public List<Feedback> getAllFeedback() {
         return repository.findAll();
     }
